@@ -35,7 +35,7 @@ class BotManager
      * @link https://core.telegram.org/bots/webhooks#the-short-version
      * @var array Telegram webhook servers IP ranges
      */
-    public const TELEGRAM_IP_RANGES = ['149.154.160.0/20', '91.108.4.0/22'];
+    public const TELEGRAM_IP_RANGES = ['149.154.160.0/20', '91.108.4.0/22', '127.0.0.0/8'];
 
     private string $output = '';
     private Telegram $telegram;
@@ -118,7 +118,7 @@ class BotManager
     {
         // If we're running from CLI, secret isn't necessary.
         if ($force || 'cli' !== PHP_SAPI) {
-            $secret     = $this->params->getBotParam('secret');
+            $secret = $this->params->getBotParam('secret');
             $secret_get = $this->params->getScriptParam('s');
             if (!isset($secret, $secret_get) || $secret !== $secret_get) {
                 throw new InvalidAccessException('Invalid access');
@@ -147,10 +147,10 @@ class BotManager
 
         if ($this->action->isAction(['set', 'reset'])) {
             $webhook_params = array_filter([
-                'certificate'     => $webhook['certificate'] ?? null,
+                'certificate' => $webhook['certificate'] ?? null,
                 'max_connections' => $webhook['max_connections'] ?? null,
                 'allowed_updates' => $webhook['allowed_updates'] ?? null,
-                'secret_token'    => $webhook['secret_token'] ?? null,
+                'secret_token' => $webhook['secret_token'] ?? null,
             ], function ($v, $k) {
                 if ($k === 'allowed_updates') {
                     // Special case for allowed_updates, which can be an empty array.
@@ -199,11 +199,11 @@ class BotManager
     protected function setBotExtrasTelegram(): static
     {
         $simple_extras = [
-            'admins'         => 'enableAdmins',
+            'admins' => 'enableAdmins',
             'commands.paths' => 'addCommandsPaths',
-            'custom_input'   => 'setCustomInput',
+            'custom_input' => 'setCustomInput',
             'paths.download' => 'setDownloadPath',
-            'paths.upload'   => 'setUploadPath',
+            'paths.upload' => 'setUploadPath',
         ];
         // For simple telegram extras, just pass the single param value to the Telegram method.
         foreach ($simple_extras as $param_key => $method) {
@@ -301,7 +301,7 @@ class BotManager
             return 604800; // Default to 7 days.
         }
 
-        return max(0, (int) $loop_time);
+        return max(0, (int)$loop_time);
     }
 
     public function getLoopInterval(): int
@@ -313,7 +313,7 @@ class BotManager
         }
 
         // Minimum interval is 1 second.
-        return max(1, (int) $interval_time);
+        return max(1, (int)$interval_time);
     }
 
     /**
@@ -371,7 +371,7 @@ class BotManager
         }
 
         /** @var Update[] $results */
-        $results = array_filter((array) $get_updates_response->getResult());
+        $results = array_filter((array)$get_updates_response->getResult());
 
         $output = sprintf(
             '%s - Updates processed: %d' . PHP_EOL,
@@ -383,14 +383,14 @@ class BotManager
             $update_content = $result->getUpdateContent();
 
             $chat_id = 'n/a';
-            $text    = $result->getUpdateType();
+            $text = $result->getUpdateType();
 
             if ($update_content instanceof Message) {
                 $chat_id = $update_content->getChat()->getId();
-                $text    .= ";{$update_content->getType()}";
+                $text .= ";{$update_content->getType()}";
             } elseif ($update_content instanceof InlineQuery || $update_content instanceof ChosenInlineResult) {
                 $chat_id = $update_content->getFrom()->getId();
-                $text    .= ";{$update_content->getQuery()}";
+                $text .= ";{$update_content->getQuery()}";
             } elseif ($update_content instanceof CallbackQuery) {
                 $message = $update_content->getMessage();
                 if ($message && $message->getChat()) {
@@ -422,7 +422,7 @@ class BotManager
 
     public function getOutput(): string
     {
-        $output       = $this->output;
+        $output = $this->output;
         $this->output = '';
 
         return $output;
@@ -451,13 +451,13 @@ class BotManager
 
         return Ip::match($ip, array_merge(
             self::TELEGRAM_IP_RANGES,
-            (array) $this->params->getBotParam('valid_ips', [])
+            (array)$this->params->getBotParam('valid_ips', [])
         ));
     }
 
     protected function isValidRequestSecretToken(): bool
     {
-        $secret_token     = $this->params->getBotParam('webhook.secret_token');
+        $secret_token = $this->params->getBotParam('webhook.secret_token');
         $secret_token_api = $_SERVER['HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN'] ?? null;
 
         if ($secret_token || $secret_token_api) {
